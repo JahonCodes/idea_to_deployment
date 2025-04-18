@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>URL Shortener</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      max-width: 500px;
+      margin: auto;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    #result, #originalResult {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>URL Shortener</h2>
+
+  <!-- Shorten URL -->
+  <input type="text" id="urlInput" placeholder="Enter a long URL" />
+  <button onclick="shortenUrl()">Shorten</button>
+  <div id="result"></div>
+
+  <hr />
+
+  <!-- Expand Short URL -->
+  <h3>Retrieve Original URL</h3>
+  <input type="text" id="shortCodeInput" placeholder="Enter a short code (e.g. abc123)" />
+  <button onclick="getOriginalUrl()">Get Original URL</button>
+  <div id="originalResult"></div>
+
+  <script>
+    const API_BASE = "https://ghwy4n1roj.execute-api.us-west-1.amazonaws.com/v0";
+
+    async function shortenUrl() {
+      const url = document.getElementById("urlInput").value;
+      const resultDiv = document.getElementById("result");
+
+      if (!url) {
+        resultDiv.innerText = "Please enter a URL.";
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/shorten`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.innerHTML = `Shortened URL: <a href="${data.shortUrl}" target="_blank">${data.shortUrl}</a>`;
+        } else {
+          resultDiv.innerText = data.message || "Something went wrong.";
+        }
+      } catch (err) {
+        console.error(err);
+        resultDiv.innerText = "Failed to shorten URL.";
+      }
+    }
+
+    async function getOriginalUrl() {
+      const code = document.getElementById("shortCodeInput").value;
+      const originalDiv = document.getElementById("originalResult");
+
+      if (!code) {
+        originalDiv.innerText = "Please enter a short code.";
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/${code}`, {
+          method: "GET"
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          originalDiv.innerHTML = `Original URL: <a href="${data.originalUrl}" target="_blank">${data.originalUrl}</a>`;
+        } else {
+          originalDiv.innerText = data.message || "Not found.";
+        }
+      } catch (err) {
+        console.error(err);
+        originalDiv.innerText = "Failed to retrieve original URL.";
+      }
+    }
+  </script> 
+
+</body>
+</html>
