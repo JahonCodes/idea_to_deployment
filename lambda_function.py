@@ -60,7 +60,7 @@ def lambda_handler(event, context):
                 raise ValueError("Missing short code in path")
 
             response = table.get_item(Key={'short_key': short_key})
-            print('response', response)
+
             if 'Item' not in response:
                 return {
                     "statusCode": 404,
@@ -80,7 +80,6 @@ def lambda_handler(event, context):
                 },
                 "body": ""
             }
-
 
         except Exception as e:
             return {
