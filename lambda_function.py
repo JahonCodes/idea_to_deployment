@@ -1,9 +1,11 @@
 import json
 import boto3
 import hashlib
+import os
 
 dynamodb = boto3.resource('dynamodb')
-table_name = "url-shortener"
+table_name = os.environ.get("TABLE_NAME", "url-shortener")
+api_url = os.environ.get("API_GATEWAY_URL", "wlub7qavv0")
 table = dynamodb.Table(table_name)
 
 def generate_short_key(url):
@@ -38,7 +40,7 @@ def lambda_handler(event, context):
                 'long_url': long_url
             })
 
-            short_url = f"https://ghwy4n1roj.execute-api.us-west-1.amazonaws.com/v0/{short_key}"
+            short_url = f"https://{api_url}.execute-api.us-west-1.amazonaws.com/v0/{short_key}"
 
             return {
                 "statusCode": 200,
